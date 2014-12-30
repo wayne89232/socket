@@ -19,7 +19,7 @@ SSL_CTX* InitServerCTX(void)
  
     OpenSSL_add_all_algorithms();  /* load & register all cryptos, etc. */
     SSL_load_error_strings();   /* load all error messages */
-    method = SSLv3_server_method();  /* create new server-method instance */
+    method = (SSL_METHOD*)SSLv3_server_method();  /* create new server-method instance */
     ctx = SSL_CTX_new(method);   /* create new context from method */
     if ( ctx == NULL )
     {
@@ -65,7 +65,7 @@ ServerSocket::ServerSocket ( int port )
     }
   SSL_library_init();
   this->ctx = InitServerCTX();
-  LoadCertificates(this->ctx, "mycert.pem", "mycert.pem");
+  LoadCertificates(this->ctx, (char*)"mycert.pem", (char*)"mycert.pem");
   if ( ! Socket::listen() )
     {
       throw SocketException ( "Could not listen to socket." );
@@ -101,7 +101,6 @@ const ServerSocket& ServerSocket::operator >> ( std::string& s ) const
 
 void ServerSocket::accept ( ServerSocket& sock )
 {
-  if ( ! Socket::accept ( sock ) )
     {
       throw SocketException ( "Could not accept socket." );
     }

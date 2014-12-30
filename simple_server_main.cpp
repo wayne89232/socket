@@ -15,7 +15,7 @@ void* res(void* new_sock);
 
 list<Clients> user_list;
 
-int main ( int argc, int argv[] )
+int main ( int argc, char* argv[] )
 {
   	std::cout << "Running....\n";
 
