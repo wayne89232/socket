@@ -29,7 +29,7 @@ int main  ( int argc, char* argv[] )
         pthread_mutex_t mutex;       
         while ( true ) 
         {
-            pthread_mutex_lock (&mutex);
+            // pthread_mutex_lock (&mutex);
             pthread_t waitcon;
             usleep(100);
             cout << menu;
@@ -157,7 +157,7 @@ int main  ( int argc, char* argv[] )
                 // cout << num << " " << name << "\n";
             }
 
-            pthread_mutex_unlock (&mutex);
+            // pthread_mutex_unlock (&mutex);
             
         }
     }

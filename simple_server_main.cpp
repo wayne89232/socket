@@ -15,7 +15,7 @@ void* res(void* new_sock);
 
 list<Clients> user_list;
 
-int main ( int argc, char* argv[] )
+int main ()
 {
   	std::cout << "Running....\n";
 
@@ -25,13 +25,13 @@ int main ( int argc, char* argv[] )
       	// Create the socket
       	ServerSocket server ( 30000 );
     	int count = 0;
-		pthread_t respond[100000];
-		ServerSocket new_sock[100000];
+		pthread_t respond[10000];
+		ServerSocket new_sock[10000];
     	while ( true )
 		{
-	  		server.accept ( new_sock[count] );
+	  		SSL_accept ( new_sock[count].get_ssl() );
 	  		std::cout << "Connection established.\n";
-
+	  		ShowCerts(ssl);
 	  		// cout << new_sock[count].get_m_sock() << "\n";
 				  		
 	  		pthread_create( &respond[count], NULL, res, &(new_sock[count]) );
@@ -68,3 +68,23 @@ void* res(void* new_sock)
 		std::cout << "Connection broken." << "\nExiting.\n";
 	}
 }
+void ShowCerts(SSL* ssl)
+{   X509 *cert;
+    char *line;
+ 
+    cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
+    if ( cert != NULL )
+    {
+        printf("Server certificates:\n");
+        line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+        printf("Subject: %s\n", line);
+        free(line);
+        line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+        printf("Issuer: %s\n", line);
+        free(line);
+        X509_free(cert);
+    }
+    else
+        printf("No certificates.\n");
+}
+
