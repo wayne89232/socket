@@ -15,7 +15,7 @@ void* res(void* new_sock);
 
 list<Clients> user_list;
 
-int main ( int argc, char* argv[] )
+int main ()
 {
   	std::cout << "Running....\n";
 
@@ -25,8 +25,8 @@ int main ( int argc, char* argv[] )
       	// Create the socket
       	ServerSocket server ( 30000 );
     	int count = 0;
-		pthread_t respond[100000];
-		ServerSocket new_sock[100000];
+		pthread_t respond[10000];
+		ServerSocket new_sock[10000];
     	while ( true )
 		{
 	  		server.accept ( new_sock[count] );

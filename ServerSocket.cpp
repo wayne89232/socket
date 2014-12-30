@@ -37,7 +37,7 @@ void LoadCertificates(SSL_CTX* ctx, char* CertFile, char* KeyFile)
         ERR_print_errors_fp(stderr);
         abort();
     }
-    /* set the private key from KeyFile (may be the same as CertFile) */
+    
     if ( SSL_CTX_use_PrivateKey_file(ctx, KeyFile, SSL_FILETYPE_PEM) <= 0 )
     {
         ERR_print_errors_fp(stderr);
@@ -65,7 +65,18 @@ ServerSocket::ServerSocket ( int port )
     }
   SSL_library_init();
   this->ctx = InitServerCTX();
-  LoadCertificates(this->ctx, (char*)"mycert.pem", (char*)"mycert.pem");
+  string a = "mycert.pem";
+  string b = "mykey.pem";
+  char* a2 = new char[a.size()+1];
+  char* b2 = new char[b.size()+1];
+  copy(a.begin(), a.end(), a2);
+  copy(b.begin(), b.end(), b2);
+  a2[a.size()] = '\0';
+  b2[b.size()] = '\0';
+  LoadCertificates(this->ctx, a2, b2);
+  
+  delete [] a2;
+  delete [] b2;
   if ( ! Socket::listen() )
     {
       throw SocketException ( "Could not listen to socket." );
@@ -101,6 +112,7 @@ const ServerSocket& ServerSocket::operator >> ( std::string& s ) const
 
 void ServerSocket::accept ( ServerSocket& sock )
 {
+  if ( ! Socket::accept ( sock ) )
     {
       throw SocketException ( "Could not accept socket." );
     }
