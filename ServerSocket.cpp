@@ -16,11 +16,11 @@ using namespace std;
 SSL_CTX* InitServerCTX(void)
 {   SSL_METHOD *method;
     SSL_CTX *ctx;
- 
-    OpenSSL_add_all_algorithms();  
-    SSL_load_error_strings();   
-    method = SSLv3_server_method();  
-    ctx = SSL_CTX_new(method); 
+
+    OpenSSL_add_all_algorithms();  /* load & register all cryptos, etc. */
+    SSL_load_error_strings();   /* load all error messages */
+    method = (SSL_METHOD*)SSLv3_server_method();  /* create new server-method instance */
+    ctx = SSL_CTX_new(method);   /* create new context from method */
     if ( ctx == NULL )
     {
         ERR_print_errors_fp(stderr);
@@ -62,7 +62,7 @@ ServerSocket::ServerSocket ( int port )
     }
   SSL_library_init();
   this->ctx = InitServerCTX();
-  LoadCertificates(this->ctx, "mycert.pem", "mycert.pem");
+  LoadCertificates(this->ctx, (char*)"mycert.pem", (char*)"mycert.pem");
   if ( ! Socket::listen() )
     {
       throw SocketException ( "Could not listen to socket." );
@@ -98,7 +98,6 @@ const ServerSocket& ServerSocket::operator >> ( std::string& s ) const
 
 void ServerSocket::accept ( ServerSocket& sock )
 {
-  if ( ! Socket::accept ( sock ) )
     {
       throw SocketException ( "Could not accept socket." );
     }

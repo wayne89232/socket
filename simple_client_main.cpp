@@ -14,7 +14,7 @@ void* peering(void* port);
 
 int a;
 
-int main  ( int argc, int argv[] ) 
+int main  ( int argc, char* argv[] ) 
 {
     string menu ( "Select what to do:\n"); 
     menu += "1. Register to server\n";
