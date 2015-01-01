@@ -11,6 +11,7 @@ using namespace std;
 
 void* res(void* new_sock);
 
+void ShowCerts(SSL* ssl);
 
 
 list<Clients> user_list;
@@ -28,14 +29,22 @@ int main ()
 		pthread_t respond[10000];
 		ServerSocket new_sock[10000];
     	while ( true )
-		{
-	  		SSL_accept ( new_sock[count].get_ssl() );
-	  		std::cout << "Connection established.\n";
-	  		ShowCerts(ssl);
-	  		// cout << new_sock[count].get_m_sock() << "\n";
-				  		
-	  		pthread_create( &respond[count], NULL, res, &(new_sock[count]) );
-			count++;
+		{	
+			
+	  		server.accept ( new_sock[count] );
+	  		
+	  		if(SSL_accept(new_sock[count].get_ssl()) == -1){
+	  			ERR_print_errors_fp(stderr);
+	  		}
+	  		else
+	  		{
+		  			ShowCerts(new_sock[count].get_ssl());	
+		  		
+		  		std::cout << "Connection established.\n";
+					  		
+		  		pthread_create( &respond[count], NULL, res, &(new_sock[count]) );
+				count++;
+			}
 		}
     }
   	catch ( SocketException& e )
@@ -73,6 +82,7 @@ void ShowCerts(SSL* ssl)
     char *line;
  
     cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
+    // cout << ssl << " " << cert << "\n";
     if ( cert != NULL )
     {
         printf("Server certificates:\n");

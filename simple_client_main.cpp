@@ -11,8 +11,10 @@
 using namespace std;
 
 void* peering(void* port);
-
+void ShowCerts(SSL* ssl);
 int a;
+
+
 
 int main  ( int argc, char* argv[] ) 
 {
@@ -29,6 +31,7 @@ int main  ( int argc, char* argv[] )
         pthread_mutex_t mutex;       
         while ( true ) 
         {
+           // cout <<  SSL_get_cipher(client_socket.get_ssl()) << "\n";
             // pthread_mutex_lock (&mutex);
             pthread_t waitcon;
             usleep(100);
@@ -147,7 +150,7 @@ int main  ( int argc, char* argv[] )
             }
             else
             {
-                cout << "13";
+                cout << "fail";
                 string a;          
                 // client_socket << "List";
                 // client_socket >> res;
@@ -183,21 +186,28 @@ void* peering(void* port) //for listenning to other peer : void* client_socket
 
             ServerSocket new_sock;
             server.accept ( new_sock );
-            std::cout << "Connection established.\n";
-            try
-            {
-                while ( true )
-                {
-                    
-                    std::string data;
-                    new_sock >> data;
-                    // new_sock << new_sock.respond (data);
-                    cout << "Peer: " << data << "\n";
-                }
-                
+            if(SSL_accept(new_sock.get_ssl()) == -1){
+                ERR_print_errors_fp(stderr);
             }
-            catch ( SocketException& e) {
-                cout << "Connection broken.\n";
+            else{
+                ShowCerts(new_sock.get_ssl());   
+
+                std::cout << "Connection established.\n";
+                try
+                {
+                    while ( true )
+                    {
+                        
+                        std::string data;
+                        new_sock >> data;
+                        // new_sock << new_sock.respond (data);
+                        cout << "Peer: " << data << "\n";
+                    }
+                    
+                }
+                catch ( SocketException& e) {
+                    cout << "Connection broken.\n";
+                }
             }
         }
     }
@@ -206,4 +216,25 @@ void* peering(void* port) //for listenning to other peer : void* client_socket
         std::cout << "Exception was caught:" << e.description() << "\nExiting.\n";
     }
 }
+
+// void ShowCerts(SSL* ssl)
+// {   X509 *cert;
+//     char *line;
+ 
+//     cert = SSL_get_peer_certificate(ssl); /* Get certificates (if available) */
+//     // cout << ssl << " " << cert << "\n";
+//     if ( cert != NULL )
+//     {
+//         printf("Server certificates:\n");
+//         line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
+//         printf("Subject: %s\n", line);
+//         free(line);
+//         line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
+//         printf("Issuer: %s\n", line);
+//         free(line);
+//         X509_free(cert);
+//     }
+//     else
+//         printf("No certificates.\n");
+// }
 

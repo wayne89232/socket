@@ -14,7 +14,8 @@
 using namespace std;
 
 SSL_CTX* InitServerCTX(void)
-{   SSL_METHOD *method;
+{   
+    SSL_METHOD *method;
     SSL_CTX *ctx;
 
     OpenSSL_add_all_algorithms();  /* load & register all cryptos, etc. */
@@ -126,6 +127,7 @@ SSL_CTX*  ServerSocket::get_ctx()
 {
   return this->ctx;
 }
+
 SSL* ServerSocket::get_ssl()
 {
   return this->ssl;

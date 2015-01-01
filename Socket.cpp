@@ -9,6 +9,8 @@
 
 
 
+
+
 Socket::Socket() :
   m_sock( -1 ){
     memset( &m_addr, 0, sizeof(m_addr));
@@ -95,10 +97,10 @@ bool Socket::accept ( Socket& new_socket )
   
   int addr_length = sizeof ( m_addr );
   new_socket.m_sock = ::accept ( m_sock, ( sockaddr * ) &m_addr, ( socklen_t * ) &addr_length );
-  this->ssl = SSL_new(this->ctx);
-  SSL_set_fd(ssl, new_socket.m_sock);
-
-  // this->m_addr = m_addr;
+  // SSL_library_init();
+  new_socket.ssl = SSL_new(this->ctx);
+  SSL_set_fd(new_socket.ssl, new_socket.m_sock);
+  // std::cout << "cert "<< SSL_get_peer_certificate(this->ssl) << "\n";
   if ( new_socket.m_sock <= 0 )
     return false;
   else
@@ -110,8 +112,10 @@ bool Socket::accept ( Socket& new_socket )
 
 bool Socket::send ( const std::string s ) const
 {
-  int status = ::send ( m_sock, s.c_str(), s.size(), MSG_NOSIGNAL );
-  if ( status == -1 )
+  // int status = ::send ( m_sock, s.c_str(), s.size(), MSG_NOSIGNAL );
+
+  int status = SSL_write( this->ssl, s.c_str(), strlen( s.c_str() ) );
+  if ( status < 0 )
     {
       return false;
     }
@@ -130,9 +134,10 @@ int Socket::recv ( std::string& s ) const
 
   memset ( buf, 0, MAXRECV + 1 );
 
-  int status = ::recv ( m_sock, buf, MAXRECV, 0 );
+  // int status = ::recv ( m_sock, buf, MAXRECV, 0 );
+  int status = SSL_read( this->ssl, buf, sizeof( buf ) );
 
-  if ( status == -1 )
+  if ( status < 0 )
     {
       std::cout << "status == -1   errno == " << errno << "  in Socket::recv\n";
       return 0;
@@ -152,6 +157,7 @@ int Socket::recv ( std::string& s ) const
 
 bool Socket::connect ( const std::string host, const int port )
 {
+  SSL_library_init();
   if ( ! is_valid() ) return false;
 
   m_addr.sin_family = AF_INET;
@@ -163,6 +169,10 @@ bool Socket::connect ( const std::string host, const int port )
 
   status = ::connect ( m_sock, ( sockaddr * ) &m_addr, sizeof ( m_addr ) );
 
+  SSL_library_init();
+  this->ssl = SSL_new(this->ctx);
+  SSL_set_fd(this->ssl, m_sock);
+  // std::cout << this->ssl << "cert "<<SSL_get_peer_certificate(this->ssl) << "\n";
   if ( status == 0 )
     return true;
   else
